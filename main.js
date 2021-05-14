@@ -90,15 +90,15 @@ function remove(pdf) {
 function randomString() {
   return Math.random().toString(36).substring(7);
 }
-_app.post("/test", upload.any(), (req, res) => {
-  console.log(req);
+_app.post("/print", upload.any(), (req, res) => {
+  console.log(req.query.printerName);
   const pdf = save(req.files[0].buffer);
   const options = {
-    printer: "Microsoft Print to PDF",
+    printer: req.query.printerName || 'Microsoft Print To PDF',
     win32: ['-print-settings "fit"', '-silent'],
   };
 
-  printer.print(pdf).then(() => res.send({ success: true })).catch((e) => { console.log(e); res.send({ e }) });
+  printer.print(pdf, options).then(() => res.send({ success: true })).catch((e) => { console.log(e); res.send({ e }) });
   // .finally(() => remove(pdf));
   // const options = {
   //   silent: true,
