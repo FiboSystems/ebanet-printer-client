@@ -71,6 +71,10 @@ function handleSquirrelEvent() {
   }
 }
 
+app.setLoginItemSettings({
+  openAtLogin: true,
+})
+
 let tray = null
 let mainWindow = null;
 
