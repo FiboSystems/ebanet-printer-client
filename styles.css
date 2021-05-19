@@ -1,0 +1,24 @@
+body, html {
+    background: #017a88;
+    height: 100%;
+    margin: 0;
+}
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    flex-direction: column;
+}
+
+p {
+    font-family: sans-serif;
+    color: white;
+    text-align: center;
+    opacity: .82;
+}
+
+img {
+    width: 100px;
+    height: 100px;
+}
