@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const multer = require("multer");
 const upload = multer({});
 const cors = require("cors");
-const printer = require("pdf-to-printer");
+const printManager = require("pdf-to-printer");
 const { BrowserWindow } = require('electron')
 
 const api = (window) => {
@@ -28,24 +28,65 @@ const api = (window) => {
 
     /* Printers */
     _app.get("/api/printers", upload.any(), async (req, res) => {
-        return res.send(window.webContents.getPrinters());
+        let printers = [];
+        try {
+            printers = window.webContents.getPrinters();
+        } catch (e) {
+            return res.status(500).send(e);
+        }
+        return res.send(printers);
     });
 
     _app.get("/api/printers/default", upload.any(), async (req, res) => {
-        return res.send(window.webContents.getPrinters().find(p => p.isDefault));
+        let printer;
+        try {
+            printer = getDefaultPrinter();
+        } catch (e) {
+            return res.status(500).send(e);
+        }
+        return res.send(printer);
     });
 
     _app.get("/api/printers/:display_name", upload.any(), async (req, res) => {
         const { display_name } = req.params;
-        const printer = window.webContents.getPrinters().find(p => p.displayName === display_name);
+        let printer;
+        try {
+            printer = getPrinterByName(display_name);
+        } catch (e) {
+            return res.status(500).send(e);
+        }
         if (!printer) return res.status(404).send("Impresora no instalada");
         return res.send(printer);
     });
 
     /* Jobs */
     _app.post("/api/jobs", upload.any(), async (req, res) => {
-        return res.send(window.webContents.getPrinters());
+        const requestBuffer = req.files[0].buffer;
+        const pdf = filesHelper.savePdf(requestBuffer);
+        const { printerName, silent } = req.query;
+        const win32 = ['-print-settings "fit"']
+        if (silent !== "true") {
+            win32.push('-print-dialog');
+        }
+        const options = {
+            printer: printerName || getDefaultPrinter().name,
+            win32
+        };
+
+        printManager
+            .print(pdf, options)
+            .then(() => res.send({ success: true }))
+            .catch((e) => { res.send({ e }) })
+            .finally(() => filesHelper.removePdf(pdf));
     });
+
+    function getPrinterByName(name) {
+        return window.webContents.getPrinters().find(p => p.displayName === name);
+    }
+
+    function getDefaultPrinter() {
+        return window.webContents.getPrinters().find(p => p.isDefault);
+    }
 }
 
 module.exports = api;
