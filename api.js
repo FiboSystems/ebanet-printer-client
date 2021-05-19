@@ -41,6 +41,11 @@ const api = (window) => {
         if (!printer) return res.status(404).send("Impresora no instalada");
         return res.send(printer);
     });
+
+    /* Jobs */
+    _app.post("/api/jobs", upload.any(), async (req, res) => {
+        return res.send(window.webContents.getPrinters());
+    });
 }
 
 module.exports = api;
