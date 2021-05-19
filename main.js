@@ -1,14 +1,116 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, ipcMain} = require('electron')
+const { app, BrowserWindow, nativeImage, Tray, Menu } = require('electron')
 const path = require('path')
 const api = require("./api");
+if (require('electron-squirrel-startup')) return;
+
+if (handleSquirrelEvent()) {
+  // squirrel event handled and app will exit in 1000ms, so don't do anything else
+  return;
+}
+
+function handleSquirrelEvent() {
+  if (process.argv.length === 1) {
+    return false;
+  }
+
+  const ChildProcess = require('child_process');
+  const path = require('path');
+
+  const appFolder = path.resolve(process.execPath, '..');
+  const rootAtomFolder = path.resolve(appFolder, '..');
+  const updateDotExe = path.resolve(path.join(rootAtomFolder, 'Update.exe'));
+  const exeName = path.basename(process.execPath);
+
+  const spawn = function(command, args) {
+    let spawnedProcess, error;
+
+    try {
+      spawnedProcess = ChildProcess.spawn(command, args, {detached: true});
+    } catch (error) {}
+
+    return spawnedProcess;
+  };
+
+  const spawnUpdate = function(args) {
+    return spawn(updateDotExe, args);
+  };
+
+  const squirrelEvent = process.argv[1];
+  switch (squirrelEvent) {
+    case '--squirrel-install':
+    case '--squirrel-updated':
+      // Optionally do things such as:
+      // - Add your .exe to the PATH
+      // - Write to the registry for things like file associations and
+      //   explorer context menus
+
+      // Install desktop and start menu shortcuts
+      spawnUpdate(['--createShortcut', "EBANET - Cliente de impresión"]);
+
+      setTimeout(app.quit, 1000);
+      return true;
+
+    case '--squirrel-uninstall':
+      // Undo anything you did in the --squirrel-install and
+      // --squirrel-updated handlers
+
+      // Remove desktop and start menu shortcuts
+      spawnUpdate(['--removeShortcut', exeName]);
+
+      setTimeout(app.quit, 1000);
+      return true;
+
+    case '--squirrel-obsolete':
+      // This is called on the outgoing version of your app before
+      // we update to the new version - it's the opposite of
+      // --squirrel-updated
+
+      app.quit();
+      return true;
+  }
+}
+
+let tray = null
+let mainWindow = null;
+
+function createTray () {
+  const icon = path.join(__dirname, '/icon.ico')
+  const trayicon = nativeImage.createFromPath(icon)
+  tray = new Tray(trayicon.resize({ width: 16 }))
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Mostrar aplicación',
+      click: () => {
+        mainWindow.show();
+      }
+    },
+    {
+      label: 'Cerrar',
+      click: () => {
+        app.isQuiting = true;
+        app.quit();
+      }
+    },
+  ])
+
+  tray.setContextMenu(contextMenu);
+  tray.on('click', function () {
+    mainWindow.show();
+  })
+}
 
 function createWindow () {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  if (!tray) { // if tray hasn't been created already.
+    createTray()
+  }
+  mainWindow = new BrowserWindow({
     width: 300,
     height: 300,
     icon: __dirname + '/icon.ico',
+    skipTaskbar: true,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
@@ -18,6 +120,14 @@ function createWindow () {
   mainWindow.loadFile('index.html')
 
   // Open the DevTools.
+  mainWindow.hide();
+  mainWindow.on('close', function (event) {
+    if(!app.isQuiting){
+      event.preventDefault();
+      mainWindow.hide();
+    }
+    return false;
+  })
   api(mainWindow);
 }
 
@@ -33,12 +143,6 @@ app.whenReady().then(() => {
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
-})
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
