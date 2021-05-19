@@ -1,13 +1,14 @@
 {
-  "name": "electron-quick-start",
+  "name": "EBANET - Cliente de impresión",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "Cliente para impresiones desde EBANET",
   "main": "main.js",
   "scripts": {
     "start": "electron-forge start",
     "debug": "electron . --remote-debugging-port=9222",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "make32": "electron-forge make --arch=ia32"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -42,7 +43,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "electron_quick_start"
+            "name": "EBANET - Cliente de impresión"
           }
         },
         {
