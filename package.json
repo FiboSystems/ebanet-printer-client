@@ -34,7 +34,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "express": "^4.17.1",
     "multer": "^1.4.2",
-    "pdf-to-printer": "^2.0.1"
+    "pdf-to-printer": "^2.0.5"
   },
   "config": {
     "forge": {
