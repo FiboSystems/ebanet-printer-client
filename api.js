@@ -5,7 +5,7 @@ const multer = require("multer");
 const upload = multer({});
 const cors = require("cors");
 const printManager = require("pdf-to-printer");
-const { BrowserWindow } = require('electron')
+const os = require('os');
 
 const api = (window) => {
     // Config
@@ -26,13 +26,18 @@ const api = (window) => {
     _app.use("/assets", express.static(__dirname + "/www/assets"));
     _app.use(cors({ origin: true, credentials: true }));
 
+    /* Ping */
+    _app.get("/api/ping", async (req, res) => {
+        return res.send({ success: true });
+    });
+
     /* Printers */
     _app.get("/api/printers", upload.any(), async (req, res) => {
         let printers = [];
         try {
             printers = window.webContents.getPrinters();
         } catch (e) {
-            return res.status(500).send(e);
+            return res.status(500).send({ success: false, message: e });
         }
         return res.send(printers);
     });
@@ -42,7 +47,7 @@ const api = (window) => {
         try {
             printer = getDefaultPrinter();
         } catch (e) {
-            return res.status(500).send(e);
+            return res.status(500).send({ success: false, message: e });
         }
         return res.send(printer);
     });
@@ -53,9 +58,9 @@ const api = (window) => {
         try {
             printer = getPrinterByName(display_name);
         } catch (e) {
-            return res.status(500).send(e);
+            return res.status(500).send({ success: false, message: e });
         }
-        if (!printer) return res.status(404).send("Impresora no instalada");
+        if (!printer) return res.status(404).send({ success: false, message: "Impresora no instalada" });
         return res.send(printer);
     });
 
@@ -64,7 +69,7 @@ const api = (window) => {
         const requestBuffer = req.files[0].buffer;
         const pdf = filesHelper.savePdf(requestBuffer);
         const { printerName, silent } = req.query;
-        const win32 = ['-print-settings "fit"']
+        const win32 = ['-print-settings "fit" -exit-when-done']
         if (silent !== "true") {
             win32.push('-print-dialog');
         }
@@ -75,9 +80,18 @@ const api = (window) => {
 
         printManager
             .print(pdf, options)
-            .then(() => res.send({ success: true }))
-            .catch((e) => { res.send({ e }) })
+            .then((r) => res.send({ success: true, message: r }))
+            .catch((e) => { res.send({ success: false, message: e }) })
             .finally(() => filesHelper.removePdf(pdf));
+    });
+
+    /* HostInfo */
+    _app.get("/api/host/", async (req, res) => {
+        const info = {
+            user: os.userInfo(),
+            hostname: os.hostname(),
+        }
+        return res.send(info);
     });
 
     function getPrinterByName(name) {
