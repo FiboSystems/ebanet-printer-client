@@ -6,6 +6,9 @@ const upload = multer({});
 const cors = require("cors");
 const printManager = require("pdf-to-printer");
 const os = require('os');
+const ThermalPrinter = require("node-thermal-printer").printer;
+const Types = require("node-thermal-printer").types;
+const driver = require('printer')
 
 const api = (window) => {
     // Config
@@ -92,6 +95,46 @@ const api = (window) => {
             hostname: os.hostname(),
         }
         return res.send(info);
+    });
+
+    /* ESC/POS printers */
+    _app.post("/api/pos", async (req, res) => {
+        let printer = new ThermalPrinter({
+            type: Types.EPSON,
+            interface: 'printer:Two Pilots Demo Printer',
+            driver: driver,
+        });
+
+        printer.println("MAXI CODE");
+        printer.maxiCode("4126565");
+
+        printer.newLine();
+        printer.newLine();
+        printer.println("CODE93");
+        printer.printBarcode("4126565");
+
+        printer.newLine();
+        printer.newLine();
+        printer.println("CODE128");
+        printer.code128("4126565", {
+            height: 50,
+            text: 1
+        });
+
+        printer.newLine();
+        printer.newLine();
+        printer.println("PDF417");
+        printer.pdf417("4126565");
+
+        printer.newLine();
+        printer.newLine();
+        printer.cut();
+        printer.println("QR");
+        printer.printQR("4126565");
+        printer.table(["One", "Two", "Three"]);
+        printer.cut();
+        printer.execute();
+        return res.send({ success: true });
     });
 
     function getPrinterByName(name) {
