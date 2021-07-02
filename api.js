@@ -98,13 +98,13 @@ const api = (window) => {
     });
 
     /* ESC/POS printers */
-    _app.post("/api/pos", async (req, res) => {
+    _app.post("/api/pos/:printer_name", async (req, res) => {
+        const { printer_name } = req.params;
         let printer = new ThermalPrinter({
             type: Types.EPSON,
-            interface: 'printer:Two Pilots Demo Printer',
+            interface: `printer:${printer_name}`,
             driver: driver,
         });
-
         printer.println("MAXI CODE");
         printer.maxiCode("4126565");
 
