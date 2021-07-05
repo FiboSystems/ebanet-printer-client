@@ -8,7 +8,8 @@ const printManager = require("pdf-to-printer");
 const os = require('os');
 const ThermalPrinter = require("node-thermal-printer").printer;
 const Types = require("node-thermal-printer").types;
-const driver = require('printer')
+const driver = require('printer');
+const { count } = require("console");
 
 const api = (window) => {
     // Config
@@ -26,6 +27,7 @@ const api = (window) => {
             extended: false,
         })
     );
+    _app.use(bodyParser.json());
     _app.use("/assets", express.static(__dirname + "/www/assets"));
     _app.use(cors({ origin: true, credentials: true }));
 
@@ -100,41 +102,40 @@ const api = (window) => {
     /* ESC/POS printers */
     _app.post("/api/pos/:printer_name", async (req, res) => {
         const { printer_name } = req.params;
+        const { schema, settings } = req.body;
+
         let printer = new ThermalPrinter({
             type: Types.EPSON,
             interface: `printer:${printer_name}`,
             driver: driver,
         });
-        printer.println("MAXI CODE");
-        printer.maxiCode("4126565");
-
-        printer.newLine();
-        printer.newLine();
-        printer.println("CODE93");
-        printer.printBarcode("4126565");
-
-        printer.newLine();
-        printer.newLine();
-        printer.println("CODE128");
-        printer.code128("4126565", {
-            height: 50,
-            text: 1
-        });
-
-        printer.newLine();
-        printer.newLine();
-        printer.println("PDF417");
-        printer.pdf417("4126565");
-
-        printer.newLine();
-        printer.newLine();
-        printer.cut();
-        printer.println("QR");
-        printer.printQR("4126565");
-        printer.table(["One", "Two", "Three"]);
-        printer.cut();
-        printer.execute();
-        return res.send({ success: true });
+        printer.setTextSize(settings.textWidth, settings.textHeight);  
+        try {
+            for (const schemaItem of schema) {
+                for (const command in schemaItem.commands) {
+                    const args = schemaItem.commands[`${command}`] === "content" ? schemaItem.content : schemaItem.commands[`${command}`];
+                    if (command.includes('|')) {
+                        const count = command.substring(0, command.lastIndexOf('|'));
+                        const commandKey = command.substring(command.lastIndexOf('|') + 1, command.length);
+                        let i = 0;
+                        while (i <= parseInt(count)) {
+                            printer[`${commandKey}`](args);   
+                            i++;
+                          }
+                    } else {
+                        if (command === 'leftRight') {
+                            printer[`${command}`](args.split(',')[0], args.split(',')[1]);
+                        } else {
+                            printer[`${command}`](args); 
+                        }
+                    }
+                }
+            }
+            await printer.execute();
+            return res.send({ success: true });
+        } catch (error) {
+            return res.send({ success: false });
+        }
     });
 
     function getPrinterByName(name) {
