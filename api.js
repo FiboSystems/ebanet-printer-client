@@ -110,39 +110,43 @@ const api = (window) => {
             return res.status(404).send({ success: false, message: e });
         }
         if (!printerName) return res.status(404).send({ success: false, message: "Impresora no encontrada." });
-
+        const schemaJobs = Array.isArray(req.body) ? req.body : [schema];
         let printer = new ThermalPrinter({
             type: Types.EPSON,
             interface: `printer:${printer_name}`,
             driver: driver,
         });
 
-        let isConnected = await printer.isPrinterConnected();
-        if (!isConnected) return res.status(503).send({ success: false, message: "Impresora no conectada." });
-
-        printer.setTextSize(settings.textWidth, settings.textHeight);
         try {
-            for (const schemaItem of schema) {
-                for (const command in schemaItem.commands) {
-                    const args = schemaItem.commands[`${command}`] === "content" ? schemaItem.content : schemaItem.commands[`${command}`];
-                    if (command.includes('|')) {
-                        const count = command.substring(0, command.lastIndexOf('|'));
-                        const commandKey = command.substring(command.lastIndexOf('|') + 1, command.length);
-                        let i = 0;
-                        while (i <= parseInt(count)) {
-                            printer[`${commandKey}`](args);
-                            i++;
-                          }
-                    } else {
-                        if (command === 'leftRight') {
-                            printer[`${command}`](args.split(',')[0], args.split(',')[1]);
+            for (const job of schemaJobs) {
+                console.log(job);
+                let isConnected = await printer.isPrinterConnected();
+                if (!isConnected) return res.status(503).send({ success: false, message: "Impresora no conectada." });
+
+                printer.setTextSize(settings.textWidth, settings.textHeight);
+
+                for (const schemaItem of schema) {
+                    for (const command in schemaItem.commands) {
+                        const args = schemaItem.commands[`${command}`] === "content" ? schemaItem.content : schemaItem.commands[`${command}`];
+                        if (command.includes('|')) {
+                            const count = command.substring(0, command.lastIndexOf('|'));
+                            const commandKey = command.substring(command.lastIndexOf('|') + 1, command.length);
+                            let i = 0;
+                            while (i <= parseInt(count)) {
+                                printer[`${commandKey}`](args);
+                                i++;
+                            }
                         } else {
-                            printer[`${command}`](args);
+                            if (command === 'leftRight') {
+                                printer[`${command}`](args.split(',')[0], args.split(',')[1]);
+                            } else {
+                                printer[`${command}`](args);
+                            }
                         }
                     }
                 }
+                await printer.execute();
             }
-            await printer.execute();
             return res.send({ success: true });
         } catch (error) {
             return res.status(500).send({ success: false });
