@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, nativeImage, Tray, Menu } = require('electron')
+const { app, BrowserWindow, nativeImage, Tray, Menu, ipcMain } = require('electron')
 const path = require('path')
 const api = require("./api");
 if (require('electron-squirrel-startup')) return;
@@ -116,7 +116,9 @@ function createWindow () {
     skipTaskbar: true,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: false,
     }
   })
 
@@ -150,3 +152,6 @@ app.whenReady().then(() => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+ipcMain.on('app_version', (event) => {
+  event.sender.send('app_version', { version: app.getVersion() });
+});
