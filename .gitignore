@@ -2,4 +2,4 @@ node_modules
 out/
 dist/
 temp_files/
-electron-builder.yml
+./electron-builder.yml
