@@ -4,7 +4,7 @@
   "description": "Cliente para impresiones desde EBANET",
   "main": "main.js",
   "scripts": {
-    "start": "electrone start",
+    "start": "electron-forge start",
     "debug": "electron . --remote-debugging-port=9222",
     "package": "electron-forge package",
     "make": "electron-forge make",
@@ -13,8 +13,8 @@
     "deploy": " electron-builder build --win --publish always --x64 --ia32"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/FiboSystems/ebanet-printer-client.git"
+    "type": "git",
+    "url": "https://github.com/FiboSystems/ebanet-printer-client.git"
   },
   "author": "Fibo Systems",
   "license": "CC0-1.0",
