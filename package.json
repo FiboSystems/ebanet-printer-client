@@ -8,9 +8,14 @@
     "debug": "electron . --remote-debugging-port=9222",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "make32": "electron-forge make --arch=ia32"
+    "make32": "electron-forge make --arch=ia32",
+    "build": " electron-builder build --win --publish never --x64 --ia32",
+    "deploy": " electron-builder build --win --publish always --x64 --ia32"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/FiboSystems/ebanet-printer-client.git"
+  },
   "author": "Fibo Systems",
   "license": "CC0-1.0",
   "devDependencies": {
@@ -19,12 +24,13 @@
     "@electron-forge/maker-rpm": "^6.0.0-beta.54",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
     "@electron-forge/maker-zip": "^6.0.0-beta.54",
-    "electron": "^12.0.6"
+    "electron": "^12.0.6",
+    "electron-builder": "^22.13.1"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
-    "electron-squirrel-startup": "^1.0.0",
+    "electron-updater": "^4.3.9",
     "express": "^4.17.1",
     "multer": "^1.4.2",
     "node-thermal-printer": "^4.1.2",
