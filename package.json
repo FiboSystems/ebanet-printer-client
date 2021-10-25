@@ -10,7 +10,8 @@
     "make": "electron-forge make",
     "make32": "electron-forge make --arch=ia32",
     "build": " electron-builder build --win --publish never --x64 --ia32",
-    "deploy": " electron-builder build --win --publish always --x64 --ia32"
+    "deploy": " electron-builder build --win --publish always --x64 --ia32",
+    "publish": "electron-forge publish"
   },
   "repository": {
     "type": "git",
