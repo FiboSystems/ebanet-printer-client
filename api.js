@@ -110,7 +110,7 @@ const api = (window) => {
             return res.status(404).send({ success: false, message: e });
         }
         if (!printerName) return res.status(404).send({ success: false, message: "Impresora no encontrada." });
-        const schemaJobs = Array.isArray(req.body) ? req.body : [schema];
+        const schemaJobs = Array.isArray(req.body) ? req.body : [{ schema, settings }];
         let printer = new ThermalPrinter({
             type: Types.EPSON,
             interface: `printer:${printer_name}`,
@@ -123,9 +123,9 @@ const api = (window) => {
                 let isConnected = await printer.isPrinterConnected();
                 if (!isConnected) return res.status(503).send({ success: false, message: "Impresora no conectada." });
 
-                printer.setTextSize(settings.textWidth, settings.textHeight);
+                printer.setTextSize(job.textHeight, job.textWidth);
 
-                for (const schemaItem of schema) {
+                for (const schemaItem of job.schema) {
                     for (const command in schemaItem.commands) {
                         const args = schemaItem.commands[`${command}`] === "content" ? schemaItem.content : schemaItem.commands[`${command}`];
                         if (command.includes('|')) {
@@ -149,7 +149,8 @@ const api = (window) => {
             }
             return res.send({ success: true });
         } catch (error) {
-            return res.status(500).send({ success: false });
+            console.log("error", error)
+            return res.status(500).send({ success: false, message: error });
         }
     });
 
