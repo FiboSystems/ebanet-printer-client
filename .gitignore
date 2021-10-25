@@ -1,6 +1,5 @@
 node_modules
-
 out/
-electron-builder.yml
 dist/
 temp_files/
+electron-builder.yml
