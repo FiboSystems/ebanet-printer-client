@@ -4,7 +4,7 @@
   "description": "Cliente para impresiones desde EBANET",
   "main": "main.js",
   "scripts": {
-    "start": "electron-forge start",
+    "start": "electrone start",
     "debug": "electron . --remote-debugging-port=9222",
     "package": "electron-forge package",
     "make": "electron-forge make",
