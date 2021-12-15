@@ -117,13 +117,14 @@ const api = (window) => {
             driver: driver,
         });
 
+        printer.setTextNormal();
+        printer.setTextSize(7,7);
+        printer.bold(true);
+
         try {
             for (const job of schemaJobs) {
-                console.log(job);
                 let isConnected = await printer.isPrinterConnected();
                 if (!isConnected) return res.status(503).send({ success: false, message: "Impresora no conectada." });
-
-                printer.setTextSize(job.textHeight, job.textWidth);
 
                 for (const schemaItem of job.schema) {
                     for (const command in schemaItem.commands) {
@@ -145,6 +146,7 @@ const api = (window) => {
                         }
                     }
                 }
+                printer.cut();
                 await printer.execute();
             }
             return res.send({ success: true });
