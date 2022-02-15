@@ -1,8 +1,7 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, nativeImage, Tray, Menu, ipcMain } = require('electron')
+const { app, BrowserWindow, nativeImage, Tray, Menu, ipcMain, dialog, autoUpdater } = require('electron')
 const path = require('path')
 const api = require("./api");
-const { app, autoUpdater, dialog } = require('electron-updater');
 if (require('electron-squirrel-startup')) return;
 
 const server = 'https://hazel-electron.vercel.app'
