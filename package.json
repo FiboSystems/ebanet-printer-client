@@ -1,6 +1,6 @@
 {
   "name": "ebanet-printer-client",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Cliente para impresiones desde EBANET",
   "main": "main.js",
   "scripts": {
