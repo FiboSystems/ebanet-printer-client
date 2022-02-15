@@ -2,13 +2,35 @@
 const { app, BrowserWindow, nativeImage, Tray, Menu, ipcMain } = require('electron')
 const path = require('path')
 const api = require("./api");
-const { autoUpdater } = require('electron-updater');
+const { app, autoUpdater, dialog } = require('electron-updater');
 if (require('electron-squirrel-startup')) return;
+
+const server = 'https://hazel-electron.vercel.app'
+const url = `${server}/update/${process.platform}/${app.getVersion()}`
+autoUpdater.setFeedURL({ url })
+
+const UPDATE_CHECK_INTERVAL = 10 * 60 * 1000
+setInterval(() => {
+  autoUpdater.checkForUpdates()
+}, UPDATE_CHECK_INTERVAL)
 
 if (handleSquirrelEvent()) {
   // squirrel event handled and app will exit in 1000ms, so don't do anything else
   return;
 }
+
+autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+  const dialogOpts = {
+    type: 'info',
+    buttons: ['Restart', 'Later'],
+    title: 'Application Update',
+    message: process.platform === 'win32' ? releaseNotes : releaseName,
+    detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+  }
+  dialog.showMessageBox(dialogOpts).then((returnValue) => {
+    if (returnValue.response === 0) autoUpdater.quitAndInstall()
+  })
+})
 
 function handleSquirrelEvent() {
   if (process.argv.length === 1) {
@@ -137,7 +159,7 @@ function createWindow () {
   })
   api(mainWindow);
   mainWindow.once('ready-to-show', () => {
-    autoUpdater.checkForUpdatesAndNotify();
+    //autoUpdater.checkForUpdatesAndNotify();
   });
 }
 
@@ -156,7 +178,7 @@ app.whenReady().then(() => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-ipcMain.on('app_version', (event) => {
+/*ipcMain.on('app_version', (event) => {
   event.sender.send('app_version', { version: app.getVersion() });
 });
 
@@ -169,4 +191,4 @@ autoUpdater.on('update-downloaded', () => {
 
 ipcMain.on('restart_app', () => {
   autoUpdater.quitAndInstall();
-});
+});*/
