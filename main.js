@@ -4,7 +4,7 @@ const path = require('path')
 const api = require("./api");
 if (require('electron-squirrel-startup')) return;
 
-const server = 'https://hazel-electron.vercel.app'
+const server = 'https://hazel-eba.vercel.app'
 const url = `${server}/update/${process.platform}/${app.getVersion()}`
 autoUpdater.setFeedURL({ url })
 
