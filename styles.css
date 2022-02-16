@@ -22,3 +22,19 @@ img {
     width: 100px;
     height: 100px;
 }
+
+button {
+    background-color: transparent;
+    border: 1px solid whitesmoke;
+    border-radius: 4px;
+    padding: .5em 1em;
+    color: white;
+}
+
+button:hover {
+    background-color: #098c9b;
+}
+
+#restartSection {
+    display: none;
+}

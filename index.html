@@ -7,21 +7,6 @@
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <title>EBANET - Cliente para impresoras</title>
     <link rel="stylesheet" href="./styles.css">
-    <style>
-      #notification {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        width: 200px;
-        padding: 20px;
-        border-radius: 5px;
-        background-color: white;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-      }
-      .hidden {
-        display: none;
-      }
-    </style>
   </head>
   <body>
     <div class="container">
@@ -30,7 +15,11 @@
       </div>
       <p>El programa está listo para recibir peticiones.</p>
       <p id="version">v1.1.4</p>
-      <button id="updateButton">Revisar actualizaciones</button>
+      <button id="checkUpdatesBtn">Buscar actualizaciones</button>
+      <div id="restartSection">
+        <p>Para aplicar las actualizaciones es necesario reinciar la aplicación.</p>
+        <button id="restartBtn">Reinicar</button>
+      </div>
     </div>
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>

@@ -1,17 +1,33 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, nativeImage, Tray, Menu, ipcMain, dialog, autoUpdater } = require('electron')
+const {
+  BrowserWindow,
+  Menu,
+  Notification,
+  Tray,
+  app,
+  autoUpdater,
+  dialog,
+  ipcMain,
+  nativeImage,
+} = require('electron')
 const path = require('path')
 const api = require("./api");
 if (require('electron-squirrel-startup')) return;
 
-const server = 'https://hazel-eba.vercel.app'
-const url = `${server}/update/${process.platform}/${app.getVersion()}`
+//////// Updates handling
+
+// Setup Hazel server for updates
+const server = 'https://hazel-eba.vercel.app';
+const url = `${server}/update/${process.platform}/${app.getVersion()}`;
 autoUpdater.setFeedURL({ url })
 
-const UPDATE_CHECK_INTERVAL = 10 * 60 * 1000
+let isManualUpdateCheck = false;
+
+// Set interval to check for updates.
+const UPDATE_CHECK_INTERVAL = 5 * 60 * 1000
 setInterval(() => {
-  autoUpdater.checkForUpdates()
-  console.log('Checking for updates...');
+  isManualUpdateCheck = false;
+  autoUpdater.checkForUpdates();
 }, UPDATE_CHECK_INTERVAL)
 
 if (handleSquirrelEvent()) {
@@ -19,34 +35,7 @@ if (handleSquirrelEvent()) {
   return;
 }
 
-autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-  const dialogOpts = {
-    type: 'info',
-    buttons: ['Restart', 'Later'],
-    title: 'Application Update',
-    message: process.platform === 'win32' ? releaseNotes : releaseName,
-    detail: 'A new version has been downloaded. Restart the application to apply the updates.'
-  }
-  dialog.showMessageBox(dialogOpts).then((returnValue) => {
-    if (returnValue.response === 0) autoUpdater.quitAndInstall()
-  })
-})
-
-autoUpdater.on('update-not-available', (e) => {
-  const dialogOpts = {
-    type: 'info',
-    buttons: ['OK'],
-    title: 'No hay actualizaciones disponibles.',
-    message: 'Tienes la última versión instalada.',
-    detail: 'Tienes la última versión instalada..'
-  }
-  dialog.showMessageBox(dialogOpts);
-})
-
-autoUpdater.on('error', (e) => {
-  dialog.showErrorBox("An error ocurred.", e.message);
-})
-
+// Squirrel installer behavior
 function handleSquirrelEvent() {
   if (process.argv.length === 1) {
     return false;
@@ -109,10 +98,67 @@ function handleSquirrelEvent() {
   }
 }
 
+autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+
+  // User clicked the check updates button.
+  if (isManualUpdateCheck) {
+    const dialogOpts = {
+      type: 'info',
+      buttons: ['Reiniciar', 'Ignorar'],
+      title: 'Actualización disponible',
+      message: process.platform === 'win32' ? releaseNotes : releaseName,
+      detail: 'Una nueva actualización se encuentra disponible. Reinicia la aplicación para aplicarla.'
+    }
+    dialog.showMessageBox(dialogOpts).then((returnValue) => {
+      if (returnValue.response === 0) {
+        app.isQuiting = true;
+        autoUpdater.quitAndInstall()
+      }
+    })
+  } else {
+    sendUpdateDownloaded()
+    const NOTIFICATION_TITLE = 'EBANET Printer Client'
+    const NOTIFICATION_BODY = 'Nueva actualización disponible.'
+    const notification = new Notification({ title: NOTIFICATION_TITLE, body: NOTIFICATION_BODY })
+    notification.show()
+    notification.on('click', (event, arg)=>{
+      mainWindow.show()
+    })
+  }
+})
+
+autoUpdater.on('update-not-available', (e) => {
+  if (isManualUpdateCheck) {
+    const dialogOpts = {
+      type: 'info',
+      buttons: ['OK'],
+      title: 'No hay actualizaciones disponibles.',
+      detail: 'Tienes la última versión instalada.'
+    }
+    dialog.showMessageBox(dialogOpts);
+  }
+})
+
+autoUpdater.on('error', (e) => {
+  if (isManualUpdateCheck) {
+    dialog.showErrorBox("Error al descargar actualizaciones.", e.message);
+  }
+})
+
+ipcMain.on('check_updates', () => {
+  isManualUpdateCheck = true;
+  autoUpdater.checkForUpdates();
+});
+
+//////////// Application configuration
+
+// Start at login
 app.setLoginItemSettings({
   openAtLogin: true,
 })
 
+
+///////////// Window and try creation
 let tray = null
 let mainWindow = null;
 
@@ -174,7 +220,8 @@ function createWindow () {
   })
   api(mainWindow);
   mainWindow.once('ready-to-show', () => {
-    //autoUpdater.checkForUpdatesAndNotify();
+    isManualUpdateCheck = false
+    autoUpdater.checkForUpdates();
   });
 }
 
@@ -204,7 +251,6 @@ autoUpdater.on('update-downloaded', () => {
   mainWindow.webContents.send('update_downloaded');
 });*/
 
-ipcMain.on('check_updates', () => {
-  console.log('on checking updates')
-  autoUpdater.checkForUpdates();
-});
+sendUpdateDownloaded = () => {
+  mainWindow.webContents.send('update_available');
+}

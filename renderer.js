@@ -14,15 +14,14 @@ const version = document.getElementById('version');
    // version.innerText = 'Version ' + arg.version;
 //});
 
-const notification = document.getElementById('notification');
-const message = document.getElementById('message');
-const restartButton = document.getElementById('restart-button');
-const checkUpdatesButton = document.getElementById('updateButton');
-// ipcRenderer.on('update_available', () => {
-//     ipcRenderer.removeAllListeners('update_available');
-//     message.innerText = 'A new update is available. Downloading now...';
-//     notification.classList.remove('hidden');
-// });
+const restartSection = document.getElementById('restartSection')
+const restartButton = document.getElementById('restartBtn')
+const checkUpdatesButton = document.getElementById('checkUpdatesBtn')
+ipcRenderer.on('update_available', () => {
+    ipcRenderer.removeAllListeners('update_available');
+    restartSection.style.display = 'block'
+    checkUpdatesButton.style.display = 'none'
+});
 // ipcRenderer.on('update_downloaded', () => {
 //     ipcRenderer.removeAllListeners('update_downloaded');
 //     message.innerText = 'Update Downloaded. It will be installed on restart. Restart now?';
