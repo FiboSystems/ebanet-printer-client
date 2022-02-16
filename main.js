@@ -11,6 +11,7 @@ autoUpdater.setFeedURL({ url })
 const UPDATE_CHECK_INTERVAL = 10 * 60 * 1000
 setInterval(() => {
   autoUpdater.checkForUpdates()
+  console.log('Checking for updates...');
 }, UPDATE_CHECK_INTERVAL)
 
 if (handleSquirrelEvent()) {
@@ -29,6 +30,25 @@ autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
   dialog.showMessageBox(dialogOpts).then((returnValue) => {
     if (returnValue.response === 0) autoUpdater.quitAndInstall()
   })
+})
+
+autoUpdater.on('update-not-available', (e) => {
+  const dialogOpts = {
+    type: 'info',
+    buttons: ['OK'],
+    title: 'No hay actualizaciones disponibles.',
+    message: 'Tienes la última versión instalada.',
+    detail: 'Tienes la última versión instalada..'
+  }
+  dialog.showMessageBox(dialogOpts);
+})
+
+autoUpdater.on('error', (e) => {
+  const dialogOpts = {
+    title: 'An error ocurred',
+    content: e.message
+  }
+  dialog.showErrorBox(dialogOpts);
 })
 
 function handleSquirrelEvent() {
@@ -186,8 +206,9 @@ autoUpdater.on('update-available', () => {
 });
 autoUpdater.on('update-downloaded', () => {
   mainWindow.webContents.send('update_downloaded');
-});
-
-ipcMain.on('restart_app', () => {
-  autoUpdater.quitAndInstall();
 });*/
+
+ipcMain.on('check_updates', () => {
+  console.log('on checking updates')
+  autoUpdater.checkForUpdates();
+});
