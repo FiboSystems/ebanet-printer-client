@@ -44,11 +44,7 @@ autoUpdater.on('update-not-available', (e) => {
 })
 
 autoUpdater.on('error', (e) => {
-  const dialogOpts = {
-    title: 'An error ocurred',
-    content: e.message
-  }
-  dialog.showErrorBox(dialogOpts);
+  dialog.showErrorBox("An error ocurred.", e.message);
 })
 
 function handleSquirrelEvent() {
