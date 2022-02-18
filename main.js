@@ -12,7 +12,10 @@ const {
 } = require('electron')
 const path = require('path')
 const api = require("./api");
+const log = require('electron-log');
 if (require('electron-squirrel-startup')) return;
+
+log.catchErrors()
 
 let tray = null
 let mainWindow = null;
@@ -73,6 +76,7 @@ function createWindow () {
       event.preventDefault();
       mainWindow.hide();
     }
+    log.info(`closing application ${new Date().toLocaleString()}`)
     return false;
   })
   api(mainWindow);
@@ -80,6 +84,7 @@ function createWindow () {
     isManualUpdateCheck = false
     sendSearchingUpdates()
     autoUpdater.checkForUpdates();
+    log.info(`checking updates on login ${new Date().toLocaleString()}`)
   });
 }
 
@@ -98,6 +103,7 @@ setInterval(() => {
   isManualUpdateCheck = false;
   sendSearchingUpdates()
   autoUpdater.checkForUpdates();
+  log.info(`silent updates check ${new Date().toLocaleString()}`)
 }, UPDATE_CHECK_INTERVAL)
 
 if (handleSquirrelEvent()) {
@@ -181,6 +187,7 @@ autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
     }
     dialog.showMessageBox(dialogOpts).then((returnValue) => {
       if (returnValue.response === 0) {
+        log.info(`restarting from dialog ${new Date().toLocaleString()}`)
         app.isQuiting = true;
         autoUpdater.quitAndInstall()
       }
@@ -192,6 +199,7 @@ autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
     const notification = new Notification({ title: NOTIFICATION_TITLE, body: NOTIFICATION_BODY })
     notification.show()
     notification.on('click', (event, arg)=>{
+      log.info(`notification clicked ${new Date().toLocaleString()}`)
       mainWindow.show()
     })
   }
@@ -217,16 +225,19 @@ autoUpdater.on('error', (e) => {
   } else {
     sendUpdateError()
   }
+  log.error(`error updating ${new Date().toLocaleString()} - ${e.code} - ${e.statusCode}  - ${e.message}`)
 })
 
 ipcMain.on('check_updates', () => {
   isManualUpdateCheck = true;
   sendSearchingUpdates()
   autoUpdater.checkForUpdates();
+  log.info(`clicked manual updates ${new Date().toLocaleString()}`)
 });
 
 ipcMain.on('restart', () => {
   app.isQuiting = true;
+  log.info(`clicked restart from app ${new Date().toLocaleString()}`)
   autoUpdater.quitAndInstall()
 });
 
