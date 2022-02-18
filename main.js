@@ -78,6 +78,7 @@ function createWindow () {
   api(mainWindow);
   mainWindow.once('ready-to-show', () => {
     isManualUpdateCheck = false
+    sendSearchingUpdates()
     autoUpdater.checkForUpdates();
   });
 }
@@ -95,6 +96,7 @@ let isManualUpdateCheck = false;
 const UPDATE_CHECK_INTERVAL = 500 * 60 * 1000
 setInterval(() => {
   isManualUpdateCheck = false;
+  sendSearchingUpdates()
   autoUpdater.checkForUpdates();
 }, UPDATE_CHECK_INTERVAL)
 
@@ -219,6 +221,7 @@ autoUpdater.on('error', (e) => {
 
 ipcMain.on('check_updates', () => {
   isManualUpdateCheck = true;
+  sendSearchingUpdates()
   autoUpdater.checkForUpdates();
 });
 
@@ -271,4 +274,8 @@ sendUpdateError = () => {
 
 sendUpdateNotAvailable = () => {
   mainWindow.webContents.send('update_not_available');
+}
+
+sendSearchingUpdates = () => {
+  mainWindow.webContents.send('searching_updates');
 }

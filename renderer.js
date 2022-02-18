@@ -76,6 +76,7 @@ ipcRenderer.on('update_not_available', () => {
 
 function checkUpdates() {
     ipcRenderer.send('check_updates');
+
 }
 checkUpdatesButton.addEventListener('click', () => checkUpdates())
 
