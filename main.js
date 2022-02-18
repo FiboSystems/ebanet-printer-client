@@ -82,9 +82,9 @@ function createWindow () {
   api(mainWindow);
   mainWindow.once('ready-to-show', () => {
     isManualUpdateCheck = false
-    sendSearchingUpdates()
-    autoUpdater.checkForUpdates();
-    log.info(`checking updates on login ${new Date().toLocaleString()}`)
+    //sendSearchingUpdates()
+    //autoUpdater.checkForUpdates();
+    //log.info(`checking updates on login ${new Date().toLocaleString()}`)
   });
 }
 
@@ -98,7 +98,7 @@ autoUpdater.setFeedURL({ url })
 let isManualUpdateCheck = false;
 
 // Set interval to check for updates.
-const UPDATE_CHECK_INTERVAL = 500 * 60 * 1000
+const UPDATE_CHECK_INTERVAL = 5 * 60 * 1000
 setInterval(() => {
   isManualUpdateCheck = false;
   sendSearchingUpdates()
