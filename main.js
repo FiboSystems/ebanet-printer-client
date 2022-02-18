@@ -204,6 +204,8 @@ autoUpdater.on('update-not-available', (e) => {
       detail: 'Tienes la última versión instalada.'
     }
     dialog.showMessageBox(dialogOpts);
+  } else {
+    sendUpdateNotAvailable()
   }
 })
 
@@ -265,4 +267,8 @@ sendUpdateDownloaded = () => {
 
 sendUpdateError = () => {
   mainWindow.webContents.send('update_error');
+}
+
+sendUpdateNotAvailable = () => {
+  mainWindow.webContents.send('update_not_available');
 }

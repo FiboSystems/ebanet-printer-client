@@ -44,6 +44,15 @@ ipcRenderer.on('update_error', () => {
     status.style.display = 'none'
     error.style.display = 'block'
 });
+
+ipcRenderer.on('update_not_available', () => {
+    ipcRenderer.removeAllListeners('update_error');
+    updatesSection.style.display = 'block'
+    checkUpdatesButton.style.display = 'block'
+    restartSection.style.display = 'none'
+    status.style.display = 'none'
+    error.style.display = 'none'
+});
 // ipcRenderer.on('update_downloaded', () => {
 //     ipcRenderer.removeAllListeners('update_downloaded');
 //     message.innerText = 'Update Downloaded. It will be installed on restart. Restart now?';
