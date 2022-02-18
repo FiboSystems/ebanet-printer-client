@@ -14,6 +14,74 @@ const path = require('path')
 const api = require("./api");
 if (require('electron-squirrel-startup')) return;
 
+let tray = null
+let mainWindow = null;
+
+///////////// Window and try creation
+
+function createTray () {
+  const icon = path.join(__dirname, '/icon.ico')
+  const trayicon = nativeImage.createFromPath(icon)
+  tray = new Tray(trayicon.resize({ width: 16 }))
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Mostrar aplicación',
+      click: () => {
+        mainWindow.show();
+      }
+    },
+    {
+      label: 'Cerrar',
+      click: () => {
+        app.isQuiting = true;
+        app.quit();
+      }
+    },
+  ])
+
+  tray.setContextMenu(contextMenu);
+  tray.on('click', function () {
+    mainWindow.show();
+  })
+}
+
+function createWindow () {
+  // Create the browser window.
+  if (!tray) { // if tray hasn't been created already.
+    createTray()
+  }
+  mainWindow = new BrowserWindow({
+    width: 300,
+    height: 300,
+    icon: __dirname + '/icon.ico',
+    skipTaskbar: true,
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: false,
+    }
+  })
+
+  // and load the index.html of the app.
+  mainWindow.loadFile('index.html')
+
+  // Open the DevTools.
+  mainWindow.hide();
+  mainWindow.on('close', function (event) {
+    if(!app.isQuiting){
+      event.preventDefault();
+      mainWindow.hide();
+    }
+    return false;
+  })
+  api(mainWindow);
+  mainWindow.once('ready-to-show', () => {
+    isManualUpdateCheck = false
+    autoUpdater.checkForUpdates();
+  });
+}
+
 //////// Updates handling
 
 // Setup Hazel server for updates
@@ -24,7 +92,7 @@ autoUpdater.setFeedURL({ url })
 let isManualUpdateCheck = false;
 
 // Set interval to check for updates.
-const UPDATE_CHECK_INTERVAL = 5 * 60 * 1000
+const UPDATE_CHECK_INTERVAL = 500 * 60 * 1000
 setInterval(() => {
   isManualUpdateCheck = false;
   autoUpdater.checkForUpdates();
@@ -150,80 +218,18 @@ ipcMain.on('check_updates', () => {
   autoUpdater.checkForUpdates();
 });
 
+ipcMain.on('restart', () => {
+  app.isQuiting = true;
+  autoUpdater.quitAndInstall()
+});
+
+
 //////////// Application configuration
 
 // Start at login
 app.setLoginItemSettings({
   openAtLogin: true,
 })
-
-
-///////////// Window and try creation
-let tray = null
-let mainWindow = null;
-
-function createTray () {
-  const icon = path.join(__dirname, '/icon.ico')
-  const trayicon = nativeImage.createFromPath(icon)
-  tray = new Tray(trayicon.resize({ width: 16 }))
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Mostrar aplicación',
-      click: () => {
-        mainWindow.show();
-      }
-    },
-    {
-      label: 'Cerrar',
-      click: () => {
-        app.isQuiting = true;
-        app.quit();
-      }
-    },
-  ])
-
-  tray.setContextMenu(contextMenu);
-  tray.on('click', function () {
-    mainWindow.show();
-  })
-}
-
-function createWindow () {
-  // Create the browser window.
-  if (!tray) { // if tray hasn't been created already.
-    createTray()
-  }
-  mainWindow = new BrowserWindow({
-    width: 300,
-    height: 300,
-    icon: __dirname + '/icon.ico',
-    skipTaskbar: true,
-    autoHideMenuBar: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
-      contextIsolation: false,
-    }
-  })
-
-  // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
-
-  // Open the DevTools.
-  mainWindow.hide();
-  mainWindow.on('close', function (event) {
-    if(!app.isQuiting){
-      event.preventDefault();
-      mainWindow.hide();
-    }
-    return false;
-  })
-  api(mainWindow);
-  mainWindow.once('ready-to-show', () => {
-    isManualUpdateCheck = false
-    autoUpdater.checkForUpdates();
-  });
-}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

@@ -44,7 +44,12 @@ ipcRenderer.on('update_available', () => {
 // }
 
 function checkUpdates() {
-    console.log('click on check updates')
     ipcRenderer.send('check_updates');
 }
 checkUpdatesButton.addEventListener('click', () => checkUpdates())
+
+function restart() {
+    ipcRenderer.send('restart');
+}
+restartButton.addEventListener('click', () => restart())
+
