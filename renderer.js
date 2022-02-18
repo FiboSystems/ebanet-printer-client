@@ -19,18 +19,30 @@ const restartButton = document.getElementById('restartBtn')
 const checkUpdatesButton = document.getElementById('checkUpdatesBtn')
 const updatesSection = document.getElementById('updatesSection')
 const status = document.getElementById('status')
+const error = document.getElementById('error')
 ipcRenderer.on('update_available', () => {
     ipcRenderer.removeAllListeners('update_available');
     updatesSection.style.display = 'block'
     restartSection.style.display = 'block'
     checkUpdatesButton.style.display = 'none'
     status.style.display = 'none'
+    error.style.display = 'none'
 });
 
 ipcRenderer.on('searching_updates', () => {
     ipcRenderer.removeAllListeners('searching_updates');
     updatesSection.style.display = 'none'
     status.style.display = "block"
+    error.style.display = 'none'
+});
+
+ipcRenderer.on('update_error', () => {
+    ipcRenderer.removeAllListeners('update_error');
+    updatesSection.style.display = 'block'
+    restartSection.style.display = 'none'
+    checkUpdatesButton.style.display = 'block'
+    status.style.display = 'none'
+    error.style.display = 'block'
 });
 // ipcRenderer.on('update_downloaded', () => {
 //     ipcRenderer.removeAllListeners('update_downloaded');

@@ -38,3 +38,7 @@ button:hover {
 #restartSection {
     display: none;
 }
+
+#error {
+    display: none;
+}

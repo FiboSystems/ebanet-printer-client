@@ -210,6 +210,8 @@ autoUpdater.on('update-not-available', (e) => {
 autoUpdater.on('error', (e) => {
   if (isManualUpdateCheck) {
     dialog.showErrorBox("Error al descargar actualizaciones.", e.message);
+  } else {
+    sendUpdateError()
   }
 })
 
@@ -259,4 +261,8 @@ autoUpdater.on('update-downloaded', () => {
 
 sendUpdateDownloaded = () => {
   mainWindow.webContents.send('update_available');
+}
+
+sendUpdateError = () => {
+  mainWindow.webContents.send('update_error');
 }
