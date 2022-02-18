@@ -42,3 +42,7 @@ button:hover {
 #error {
     display: none;
 }
+
+#status {
+    display: none;
+}
