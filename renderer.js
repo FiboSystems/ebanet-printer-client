@@ -17,10 +17,20 @@ const version = document.getElementById('version');
 const restartSection = document.getElementById('restartSection')
 const restartButton = document.getElementById('restartBtn')
 const checkUpdatesButton = document.getElementById('checkUpdatesBtn')
+const updatesSection = document.getElementById('updatesSection')
+const status = document.getElementById('status')
 ipcRenderer.on('update_available', () => {
     ipcRenderer.removeAllListeners('update_available');
+    updatesSection.style.display = 'block'
     restartSection.style.display = 'block'
     checkUpdatesButton.style.display = 'none'
+    status.style.display = 'none'
+});
+
+ipcRenderer.on('searching_updates', () => {
+    ipcRenderer.removeAllListeners('searching_updates');
+    updatesSection.style.display = 'none'
+    status.style.display = "block"
 });
 // ipcRenderer.on('update_downloaded', () => {
 //     ipcRenderer.removeAllListeners('update_downloaded');
