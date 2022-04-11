@@ -34,7 +34,7 @@
     "cors": "^2.8.5",
     "electron-log": "^4.4.6",
     "electron-squirrel-startup": "^1.0.0",
-    "electron-updater": "^4.3.9",
+    "electron-updater": "^5.0.1",
     "express": "^4.17.1",
     "multer": "^1.4.2",
     "node-thermal-printer": "^4.1.2",
