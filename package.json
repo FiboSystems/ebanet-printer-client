@@ -32,7 +32,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
-    "electron-log": "^4.4.6",
+    "electron-log": "^4.4.7",
     "electron-squirrel-startup": "^1.0.0",
     "electron-updater": "^4.3.9",
     "express": "^4.17.1",
